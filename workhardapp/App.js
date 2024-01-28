@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
-import { theme } from '../colors';
+import { theme } from './colors';
 import React, {useState} from "react";
 
 export default function App() {
@@ -18,7 +18,6 @@ export default function App() {
   }
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setWorking(true)}>
           <Text style={{...styles.btnText, color: working ? "white" : theme.grey}}>Work</Text>
@@ -35,13 +34,14 @@ export default function App() {
             onChangeText={onChangeText}
             onSubmitEditing={addToDo}
             returnKeyType='done'
+            value = {text}
           />
           <ScrollView>
-            {Object.keys(toDos).map(key => 
-            <View style={styles.toDo}> key={key} 
-              <Text style={styles.toDoText}>{toDos[key.text]}</Text>
-            </View>)
-            }
+            {Object.keys(toDos).map((key) => (
+            <View style={styles.toDo} key={key}>
+              <Text style={styles.toDoText}> {toDos[key].text} </Text>
+            </View>
+            ))}
           </ScrollView>
         </View>
     </View>
@@ -69,11 +69,21 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
-    marginTop: 20,
+    marginVertical: 20,
     fontSize: 18,
+  },
+  toDo:{
+    backgroundColor: theme.toDoBg,
+    marginBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+
   },
   toDoText: {
     color: "white",
+    fontSize: 16,
+    fontWeight: "500",
   },
 
 });
