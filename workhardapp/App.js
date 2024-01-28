@@ -1,20 +1,48 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, ScrollView, Alert } from 'react-native';
 import { theme } from './colors';
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Feather } from '@expo/vector-icons';
+
+const STORAGE_KEY = "@toDos";
 
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
   const onChangeText = (payload) => setText(payload);
-  const addToDo = () => {
+  const saveToDos = async (toSave) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  }
+  const loadToDos = async () => {
+    const s = await AsyncStorage.getItem(STORAGE_KEY);
+    console.log("hey!"+s);
+  }
+
+  useEffect(()=>{
+    loadToDos();
+  }, [])
+
+  const addToDo = async () => {
     if (text===""){
       return;
     }
-    const newToDos = {...toDos, [Date.now()] : {text, work:working},}
+    const newToDos = {...toDos, [Date.now()] : {text, working},}
     setToDos(newToDos);
+    await saveToDos(newToDos);
     setText(""); // Reset once submitted
+  }
+  const deleteToDo = (key) => {
+    Alert.alert("Delete To Do", "Are you sure?", [
+      {text: 'Cancel'},
+      {text: "I'm Sure", onPress: async ()=>{
+        const newToDos = {...toDos};
+        delete newToDos[key];
+        setToDos(newToDos);
+        await saveToDos(newToDos);
+      },
+      },
+    ]);    
   }
   return (
     <View style={styles.container}>
@@ -38,9 +66,14 @@ export default function App() {
           />
           <ScrollView>
             {Object.keys(toDos).map((key) => (
-            <View style={styles.toDo} key={key}>
-              <Text style={styles.toDoText}> {toDos[key].text} </Text>
-            </View>
+              toDos[key].working===working ? 
+                <View style={styles.toDo} key={key}>
+                  <Text style={styles.toDoText}> {toDos[key].text} </Text>
+                  <TouchableOpacity onPress = {()=>deleteToDo(key)}>
+                    <Feather name="trash-2" size={24} color="grey" />
+                  </TouchableOpacity>
+                </View>
+                : null
             ))}
           </ScrollView>
         </View>
@@ -78,7 +111,9 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 15,
-
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   toDoText: {
     color: "white",
