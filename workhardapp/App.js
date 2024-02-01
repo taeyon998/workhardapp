@@ -17,6 +17,9 @@ export default function App() {
   const loadToDos = async () => {
     const s = await AsyncStorage.getItem(STORAGE_KEY);
     console.log("hey!"+s);
+    if (s){
+      setToDos(JSON.parse(s));
+    }
   }
 
   useEffect(()=>{
